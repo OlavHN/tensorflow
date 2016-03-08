@@ -40,8 +40,8 @@ EOS_ID = 2
 UNK_ID = 3
 
 # Regular expressions used to tokenize.
-_WORD_SPLIT = re.compile("([.,!?\"':;)(])")
-_DIGIT_RE = re.compile(r"\d")
+_WORD_SPLIT = re.compile(b"([.,!?\"':;)(])")
+_DIGIT_RE = re.compile(br"\d")
 
 # URLs for WMT data.
 _WMT_ENFR_TRAIN_URL = "http://www.statmt.org/wmt10/training-giga-fren.tar"
@@ -131,7 +131,7 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
   if not gfile.Exists(vocabulary_path):
     print("Creating vocabulary %s from data %s" % (vocabulary_path, data_path))
     vocab = {}
-    with gfile.GFile(data_path, mode="r") as f:
+    with gfile.GFile(data_path, mode="rb") as f:
       counter = 0
       for line in f:
         counter += 1
@@ -139,7 +139,7 @@ def create_vocabulary(vocabulary_path, data_path, max_vocabulary_size,
           print("  processing line %d" % counter)
         tokens = tokenizer(line) if tokenizer else basic_tokenizer(line)
         for w in tokens:
-          word = re.sub(_DIGIT_RE, "0", w) if normalize_digits else w
+          word = re.sub(_DIGIT_RE, b"0", w) if normalize_digits else w
           if word in vocab:
             vocab[word] += 1
           else:
@@ -207,7 +207,7 @@ def sentence_to_token_ids(sentence, vocabulary,
   if not normalize_digits:
     return [vocabulary.get(w, UNK_ID) for w in words]
   # Normalize digits by 0 before looking words up in the vocabulary.
-  return [vocabulary.get(re.sub(_DIGIT_RE, "0", w), UNK_ID) for w in words]
+  return [vocabulary.get(re.sub(_DIGIT_RE, b"0", w), UNK_ID) for w in words]
 
 
 def data_to_token_ids(data_path, target_path, vocabulary_path,
